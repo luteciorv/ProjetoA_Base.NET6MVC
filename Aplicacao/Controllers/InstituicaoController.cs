@@ -1,104 +1,129 @@
-﻿using Aplicacao.Models;
+﻿using Aplicacao.Data;
+using Aplicacao.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Aplicacao.Controllers
 {
     public class InstituicaoController : Controller
     {
-        private static IList<Instituicao> _instituicoes = new List<Instituicao>()
+        private readonly Context _context;
+        public InstituicaoController(Context context)
         {
-            new Instituicao()
-            {
-                Id = 1,
-                Nome = "UniParaná",
-                Endereco = "Paraná"
-            },
-            new Instituicao()
-            {
-                Id = 2,
-                Nome = "UniSanta",
-                Endereco = "Santa Catarina"
-            },
-            new Instituicao()
-            {
-                Id = 3,
-                Nome = "UniSãoPaulo",
-                Endereco = "São Paulo"
-            },
-            new Instituicao()
-            {
-                Id = 4,
-                Nome = "UniGrandeSul",
-                Endereco = "Rio Grande do Sul"
-            },
-            new Instituicao()
-            {
-                Id = 5,
-                Nome = "UniCarioca",
-                Endereco = "Rio de Janeiro"
-            },
-        };
+            _context = context;
+        }
 
-
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            return View(_instituicoes);
+            return View(await _context.Instituicoes.ToListAsync());
         }
 
 
         [HttpGet]
-        public ActionResult Criar()
+        public ActionResult Criar() { return View(); }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Criar(Instituicao novaInstituicao)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _context.Instituicoes.AddAsync(novaInstituicao);
+                    await _context.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception exc)
+                {
+                    ModelState.AddModelError("", $"Não foi possível criar uma nova instituição. Exceção: {exc.Message}");                    
+                }
+            }
+
+            return View(novaInstituicao);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Editar(int? id)
+        {
+            if (id is null) return NotFound();
+
+            var instituicao = await _context.Instituicoes.FindAsync(id);
+            if (instituicao is null) return NotFound();
+
+            return View(instituicao);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Criar(Instituicao novaInstituicao)
+        public async Task<IActionResult> Editar(Instituicao instituicaoAlterada)
         {
-            novaInstituicao.Id = _instituicoes.Max(I => I.Id) + 1;
-            _instituicoes.Add(novaInstituicao);
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Instituicoes.Update(instituicaoAlterada);
+                    await _context.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+                    return RedirectToAction(nameof(Index));
+                }
+                catch(Exception exc)
+                {
+                    ModelState.AddModelError("", $"Não foi possível editar a instituição selecionada. Exceção: {exc.Message}");
+                }
+            }
+
+            return View(instituicaoAlterada);
         }
 
 
         [HttpGet]
-        public ActionResult Editar(int id)
+        public async Task<IActionResult> Detalhes(int? id)
         {
-            return View(_instituicoes.FirstOrDefault(I => I.Id == id));
+            if(id is null) return NotFound();
+
+            var instituicao = await _context.Instituicoes.FindAsync(id);
+            if (instituicao is null) return NotFound();
+            
+            return View(instituicao);
         }
 
-        [HttpPost]
+
+        [HttpGet]
+        public async Task<IActionResult> Apagar(int? id)
+        {
+            if (id is null) return NotFound();
+
+            var instituicao = await _context.Instituicoes.FindAsync(id);
+            if (instituicao is null) return NotFound();
+
+            return View(instituicao);
+        }       
+
+        [HttpPost, ActionName("Apagar")]
         [ValidateAntiForgeryToken]
-        public ActionResult Editar(Instituicao instituicaoAlterada)
+        public async Task<IActionResult> ApagarConfirmado(int? id)
         {
-            int posicao = _instituicoes.IndexOf(_instituicoes.First(I => I.Id == instituicaoAlterada.Id));
-            _instituicoes[posicao] = instituicaoAlterada;            
+            if (id is null) return NotFound();
 
-            return RedirectToAction("Index");
-        }
+            var instituicao = await _context.Instituicoes.FindAsync(id);
+            if (instituicao is null) return NotFound();
 
+            try
+            {
+                _context.Instituicoes.Remove(instituicao);
+                await _context.SaveChangesAsync();
 
-        [HttpGet]
-        public ActionResult Detalhes(int id)
-        {
-            return View(_instituicoes.First(I => I.Id == id));
-        }
-
-
-        [HttpGet]
-        public ActionResult Apagar(int id)
-        {
-            return View(_instituicoes.First(I => I.Id == id));
-        }
-
-        [HttpPost]
-        public ActionResult Apagar(Instituicao instituicao)
-        {
-            _instituicoes.Remove(_instituicoes.First(I => I.Id == instituicao.Id));
-
-            return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception exc)
+            {
+                ModelState.AddModelError("", $"Não foi possível apagar o departamento informado. Exceção: {exc.Message}");
+                return View(instituicao);
+            }
         }
     }
 }

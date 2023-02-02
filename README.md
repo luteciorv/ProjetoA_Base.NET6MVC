@@ -15,3 +15,9 @@ Livro ASPNET Core MVC - Projeto em .NET 6 MVC de gerenciamento de uma instituiç
 > * Implementação da alteração de dados no controlador
 > * Implementação da visualização de um único registro
 > * Finalização da aplicação: a operação Delete
+
+### Capítulo 02
+> * Configurando o Entity Framework Core
+> * Criação do banco de dados e das tabelas Departamentos e Instituições
+> * CRUD de Departamentos
+> * Refatoração do InstituicaoController (Alteração para EF Core)
