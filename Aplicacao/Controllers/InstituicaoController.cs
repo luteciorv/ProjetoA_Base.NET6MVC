@@ -117,6 +117,7 @@ namespace Aplicacao.Controllers
                 _context.Instituicoes.Remove(instituicao);
                 await _context.SaveChangesAsync();
 
+                TempData["Mensagem"] = $"A Instituição {instituicao.Nome} foi removida com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception exc)

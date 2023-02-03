@@ -21,3 +21,10 @@ Livro ASPNET Core MVC - Projeto em .NET 6 MVC de gerenciamento de uma instituiç
 > * Criação do banco de dados e das tabelas Departamentos e Instituições
 > * CRUD de Departamentos
 > * Refatoração do InstituicaoController (Alteração para EF Core)
+
+### Capítulo 03
+> * Criação de um Layout Master "_LayoutIES"
+> * Bibliotecas do lado do cliente
+> * Aplicação do Bootstrap, JQuery e Font-Awesome no CRUD de Instrituições
+> * Utilização do TempData
+> * Navegação entre os Controllers pelos links das Views
